@@ -1,4 +1,3 @@
-from loguru import logger
 from aiogram import types
 from aiogram import Router
 from aiogram.filters import CommandStart, Command
@@ -18,9 +17,5 @@ async def cmd_start(message: Message) -> None:
 
 
 @router.message()
-async def echo(message: types.Message) -> None:
-    try:
-        await message.send_copy(chat_id=message.chat.id)
-    except Exception as e:
-        logger.error(f"Can't send message - {e}")
-        await message.answer("Nice try!")
+async def translate_video(message: types.Message) -> None:
+    await message.answer("Descargando...")
