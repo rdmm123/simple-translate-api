@@ -8,5 +8,7 @@ dependencies = [
     "aiogram>=3.15.0",
     "fastapi[standard]>=0.115.5",
     "loguru>=0.7.2",
+    "playwright>=1.49.0",
     "pydantic-settings>=2.6.1",
+    "yt-dlp>=2024.11.18",
 ]

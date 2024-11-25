@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     telegram_token: str = '1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     base_webhook_url: str = 'https://my.host.name'
     webhook_auth_token: str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'  # Additional security token for webhook
+    web_user: str = 'user'
+    web_pass: str = 'pass'
 
 
 @lru_cache()  # get it from memory
