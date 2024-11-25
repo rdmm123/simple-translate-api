@@ -4,4 +4,9 @@ version = "0.1.0"
 description = "FastAPI server for downloading and translating videos"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "aiogram>=3.15.0",
+    "fastapi[standard]>=0.115.5",
+    "loguru>=0.7.2",
+    "pydantic-settings>=2.6.1",
+]
