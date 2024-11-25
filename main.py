@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from contextlib import asynccontextmanager
 from loguru import logger
-import src.telegram.handlers #noqa
 
 from src.api.webhook import router, bot_webhook
 from src.settings import get_settings

@@ -1,20 +1,28 @@
-from aiogram import Bot, Dispatcher, Router
+from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.types import WebhookInfo, BotCommand
 from aiogram.client.default import DefaultBotProperties
+from functools import lru_cache
 
 from loguru import logger
 
 from src.settings import get_settings, Settings
+from src.telegram.handlers import router
 
 cfg: Settings = get_settings()
 
-telegram_router = Router(name="telegram")
-dp = Dispatcher()
+@lru_cache()
+def get_dispatcher() -> Dispatcher:
+    dp = Dispatcher()
+    dp.include_router(router)
+    return dp
 
-
-dp.include_router(telegram_router)
-bot = Bot(token=cfg.telegram_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+@lru_cache
+def get_bot() -> Bot:
+    return Bot(
+        token=cfg.telegram_token,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+    )
 
 
 async def set_webhook(my_bot: Bot, webhook_path: str) -> None:
@@ -33,7 +41,7 @@ async def set_webhook(my_bot: Bot, webhook_path: str) -> None:
     if cfg.debug:
         logger.debug(f"Current bot info: {current_webhook_info}")
 
-    if webhook_url ==  current_webhook_info.url:
+    if webhook_url == current_webhook_info.url:
         return
 
     try:
@@ -52,7 +60,7 @@ async def set_webhook(my_bot: Bot, webhook_path: str) -> None:
 async def set_bot_commands_menu(my_bot: Bot) -> None:
     # Register commands for Telegram bot (menu)
     commands = [
-        BotCommand(command="/id", description="👋 Get my ID"),
+        BotCommand(command="/translate", description="Translate video from url"),
     ]
     try:
         await my_bot.set_my_commands(commands)
@@ -61,5 +69,7 @@ async def set_bot_commands_menu(my_bot: Bot) -> None:
 
 
 async def start_telegram(webwook_path: str):
+    bot = get_bot()
+    get_dispatcher()
     await set_webhook(bot, webwook_path)
     await set_bot_commands_menu(bot)
