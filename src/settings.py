@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import final, Annotated
+from typing import final, Annotated, Literal
 from fastapi import Depends
 
 
@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     webhook_auth_token: str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'  # Additional security token for webhook
     web_user: str = 'user'
     web_pass: str = 'pass'
+    environment: Literal['dev', 'docker', 'prd'] = 'dev'
 
 
 @lru_cache()  # get it from memory
