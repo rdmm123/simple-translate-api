@@ -13,3 +13,13 @@ dependencies = [
     "pydantic-settings>=2.6.1",
     "yt-dlp>=2024.11.18",
 ]
+
+[dependency-groups]
+dev = [
+    "aws-cdk-lib>=2.173.1",
+    "constructs>=10.4.2",
+    "poethepoet>=0.31.1",
+]
+
+[tool.poe.tasks]
+run = "fastapi dev"
