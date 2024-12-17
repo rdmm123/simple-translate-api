@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.utils.markdown import hbold
 from aiogram.types import Message
 
-from src.video.scraper import get_scraper
+from src.scraper import get_scraper
 from src.video.dowloader import download_from_url
 from src.settings import get_settings
 

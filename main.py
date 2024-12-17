@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from loguru import logger
 
 from src.api.webhook import router, bot_webhook
-from src.video.scraper import get_scraper
+from src.scraper import get_scraper
 from src.settings import get_settings
 
 cfg = get_settings()

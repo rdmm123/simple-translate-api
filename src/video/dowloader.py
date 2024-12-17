@@ -38,6 +38,7 @@ def download_video(id: int) -> Path:
         'format': 'bv+ba',
         'outtmpl': str(download_path),
         'quiet': True,
+        'no_warnings': True
     }
 
     with YoutubeDL(ydl_opts) as ydl:
