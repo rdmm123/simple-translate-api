@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     web_user: str = 'user'
     web_pass: str = 'pass'
     environment: Literal['dev', 'docker', 'prd'] = 'dev'
+    s3_bucket_name: str = 'bucket-name'
 
 
 @lru_cache()  # get it from memory

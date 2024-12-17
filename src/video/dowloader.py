@@ -105,4 +105,5 @@ async def download_from_url(browser: Browser, user: str, passw: str, url: str) -
     logger.info("getting video id")
     id = get_id_video(video_Link)
     logger.info(f"video id = {id}")
+    ctx.close()
     return download_video(id)
