@@ -1,7 +1,9 @@
-
+import io
 import re
 import ffmpeg
+import subprocess
 from pathlib import Path
+from contextlib import redirect_stdout
 
 from playwright.async_api import Browser
 from yt_dlp import YoutubeDL
@@ -15,6 +17,7 @@ VIMEO_ID_URL = 'https://vimeo.com/{id}'
 class VideoNotFound(Exception):
     pass
 
+
 def get_id_video(url: str):
     # Regular expression to find the ID after "/video/"
     match = re.search(r'\/video\/(\d+)', url)
@@ -22,6 +25,7 @@ def get_id_video(url: str):
         return match.group(1)  # Returns the first group (the ID)
     else:
         return None  # If the ID is not found
+
 
 def download_video(id: int) -> Path:
     #Path where the downloaded video will be saved
@@ -42,7 +46,6 @@ def download_video(id: int) -> Path:
     }
 
     with YoutubeDL(ydl_opts) as ydl:
-        logger.info(f"{ydl}")
         info_dict = ydl.extract_info(url, download=False)
         video_title = info_dict.get('title', None)
         logger.info(f"Video found, downloading: {video_title}")
@@ -52,6 +55,7 @@ def download_video(id: int) -> Path:
         ydl.download([url])
 
     return compress_video(download_path)
+
 
 def compress_video(path: Path) -> Path:
     try:
@@ -75,6 +79,61 @@ def compress_video(path: Path) -> Path:
     except ffmpeg.Error as e:
         logger.error('An error occurred while compressing the video: ', e.stderr.decode())
         raise
+
+
+def download_video_stream(id: int) -> Path:
+    #Path where the downloaded video will be saved
+    url = VIMEO_ID_URL.format(id=id)
+    logger.info(f"Downloading video at {url}")
+
+    args = [
+        # request to download with video ID
+        "yt-dlp", url,
+        # output to stdout (needed for streaming)
+        "-o", "-",
+        # specify output format
+        "-f", "bv+ba",
+        # "--remux-video", "mkv"
+    ]
+
+
+    downloader_proc = subprocess.Popen(
+        args,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL # don't fill up server logs
+    )
+
+    return compress_video_stream(downloader_proc.stdout)
+
+
+def compress_video_stream(input: io.BytesIO) -> Path:
+    try:
+        logger.info("compressing now")
+        stream = ffmpeg.input('pipe:')
+
+        output_path = Path('output.mp4')
+        output_path.unlink(missing_ok=True)
+
+        logger.info(f"Compressing into {output_path}")
+        stream = ffmpeg.output(stream, str(output_path),
+            vcodec='libx264',
+            crf=23,
+            preset='medium',
+            acodec='aac',
+            audio_bitrate='128k'
+        )
+
+        process = ffmpeg.run_async(stream, pipe_stdin=True, quiet=True)
+
+
+        process.communicate(input=input.read())
+
+        return output_path
+    except ffmpeg.Error as e:
+        logger.error('An error occurred while compressing the video: ', e.stderr.decode())
+        raise
+
 
 async def download_from_url(browser: Browser, user: str, passw: str, url: str) -> Path:
     ctx = await browser.new_context()
@@ -106,4 +165,4 @@ async def download_from_url(browser: Browser, user: str, passw: str, url: str) -
     id = get_id_video(video_Link)
     logger.info(f"video id = {id}")
     ctx.close()
-    return download_video(id)
+    return download_video_stream(id)

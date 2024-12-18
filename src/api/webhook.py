@@ -2,10 +2,19 @@ from typing import Annotated
 
 from aiogram import Bot, Dispatcher
 from aiogram.types import Update
-from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Header,
+    HTTPException,
+    status,
+    Body,
+)
 
 from src.settings import SettingsDep
 from src.telegram.bot import get_bot, get_dispatcher
+from src.video.dowloader import download_video, download_video_stream
 
 router = APIRouter(tags=["webhook"], prefix="/webhook")
 
@@ -31,3 +40,15 @@ async def bot_webhook(
 ) -> None | dict:
     # Use background task to not delay response
     backgrund_tasks.add_task(send_webhook_update, update, bot, dp)
+
+
+@router.post("/quick_download")
+def quick_download(
+    video_id: Annotated[int, Body()], stream: Annotated[bool, Body()] = True
+):
+    if stream:
+        path = download_video_stream(video_id)
+    else:
+        path = download_video(video_id)
+
+    return {"path": str(path)}
