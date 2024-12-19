@@ -3,8 +3,9 @@ from fastapi.routing import APIRoute
 from contextlib import asynccontextmanager
 from loguru import logger
 
-from src.api.webhook import router, bot_webhook
-from src.scraper import get_scraper
+from src.api.webhook import router as wh_router, bot_webhook
+from src.api.dev import router as dev_router
+from src.scraper import Scraper
 from src.settings import get_settings
 
 cfg = get_settings()
@@ -29,11 +30,12 @@ async def lifespan(application: FastAPI):
     logger.info("🚀 Starting application")
     from src.telegram.bot import start_telegram
     webhook_path = get_webhook_path(application)
-    scraper = await get_scraper()
+    scraper = await Scraper.create()
     await start_telegram(webhook_path)
     yield
     await scraper.close()
     logger.info("⛔ Stopping application")
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(router)
+app.include_router(wh_router)
+app.include_router(dev_router)
