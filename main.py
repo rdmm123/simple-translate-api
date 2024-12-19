@@ -38,4 +38,6 @@ async def lifespan(application: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(wh_router)
-app.include_router(dev_router)
+
+if cfg.environment == 'dev':
+    app.include_router(dev_router)
