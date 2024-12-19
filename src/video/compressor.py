@@ -69,7 +69,7 @@ class Compressor:
         input_stream = self._get_input(input)
         output_stream = self._get_output(input_stream, output_mode)
 
-        process = ffmpeg.run_async(output_stream, pipe_stdin=(not input_is_path), quiet=False)
+        process = ffmpeg.run_async(output_stream, pipe_stdin=(not input_is_path), quiet=True)
 
         if not input_is_path:
             logger.debug("Feeding input to process stdin")
