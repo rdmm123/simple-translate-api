@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.utils.markdown import hbold
 from aiogram.types import Message
 
-from src.scraper import get_scraper
+from src.scraper import Scraper
 from src.video.dowloader import download_from_url
 from src.settings import get_settings
 from src.s3_client import S3Client
@@ -30,7 +30,7 @@ async def translate_video(message: types.Message) -> None:
     s3_client = S3Client()
 
     if settings.environment == 'dev':
-        scraper = await get_scraper()
+        scraper = await Scraper.create()
         browser = await scraper.get_browser()
         video_path = await download_from_url(
             browser,

@@ -29,6 +29,3 @@ class Scraper:
             )
         return self._browser
 
-
-async def get_scraper() -> Scraper:
-    return await Scraper.create()

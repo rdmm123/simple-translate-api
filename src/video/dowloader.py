@@ -1,18 +1,20 @@
 import io
 import re
-import ffmpeg
-import subprocess
-from pathlib import Path
-from contextlib import redirect_stdout
 
-from playwright.async_api import Browser
+import subprocess
+
+from pathlib import Path
 from yt_dlp import YoutubeDL
 from loguru import logger
+
+from src.scraper import Scraper
+from src.settings import get_settings
 
 # TODO: Download, compress and upload chunk by chunk
 
 LOGIN_URL = 'https://autismpartnershipfoundation.org/log-in/'
 VIMEO_ID_URL = 'https://vimeo.com/{id}'
+
 
 class VideoNotFound(Exception):
     pass
@@ -54,34 +56,10 @@ def download_video(id: int) -> Path:
         #Download the video now
         ydl.download([url])
 
-    return compress_video(download_path)
+    return download_path
 
 
-def compress_video(path: Path) -> Path:
-    try:
-        stream = ffmpeg.input(str(path))
-
-        output_path = path.parent / f'compressed_{path.name}'
-        output_path.unlink(missing_ok=True)
-
-        logger.info(f"Compressing {path} into {output_path}")
-        stream = ffmpeg.output(stream, str(output_path),
-            vcodec='libx264',
-            crf=23,
-            preset='medium',
-            acodec='aac',
-            audio_bitrate='128k'
-        )
-
-        ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
-
-        return output_path
-    except ffmpeg.Error as e:
-        logger.error('An error occurred while compressing the video: ', e.stderr.decode())
-        raise
-
-
-def download_video_stream(id: int) -> Path:
+def download_video_stream(id: int) -> io.BufferedReader:
     #Path where the downloaded video will be saved
     url = VIMEO_ID_URL.format(id=id)
     logger.info(f"Downloading video at {url}")
@@ -93,64 +71,35 @@ def download_video_stream(id: int) -> Path:
         "-o", "-",
         # specify output format
         "-f", "bv+ba",
-        # "--remux-video", "mkv"
     ]
-
 
     downloader_proc = subprocess.Popen(
         args,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL # don't fill up server logs
+        # stderr=subprocess.DEVNULL # don't fill up server logs
     )
 
-    return compress_video_stream(downloader_proc.stdout)
+    return downloader_proc.stdout
 
 
-def compress_video_stream(input: io.BytesIO) -> Path:
-    try:
-        logger.info("compressing now")
-        stream = ffmpeg.input('pipe:')
+async def get_video_id_from_url(url: str) -> str:
+    scraper = await Scraper.create()
+    browser = await scraper.get_browser()
+    settings = get_settings()
 
-        output_path = Path('output.mp4')
-        output_path.unlink(missing_ok=True)
-
-        logger.info(f"Compressing into {output_path}")
-        stream = ffmpeg.output(stream, str(output_path),
-            vcodec='libx264',
-            crf=23,
-            preset='medium',
-            acodec='aac',
-            audio_bitrate='128k'
-        )
-
-        process = ffmpeg.run_async(stream, pipe_stdin=True, quiet=True)
-
-
-        process.communicate(input=input.read())
-
-        return output_path
-    except ffmpeg.Error as e:
-        logger.error('An error occurred while compressing the video: ', e.stderr.decode())
-        raise
-
-
-async def download_from_url(browser: Browser, user: str, passw: str, url: str) -> Path:
-    ctx = await browser.new_context()
-    page = await ctx.new_page()
+    page = await browser.new_page()
 
     logger.info("logging in")
     #the first URL (the login page)
     await page.goto(LOGIN_URL, wait_until='domcontentloaded')
-
     await page.wait_for_timeout(1_000)
     #Complete the login form
-    await page.fill('input[name="log"]', user)
-    await page.fill('input[name="pwd"]', passw)
+    await page.fill('input[name="log"]', settings.web_user)
+    await page.fill('input[name="pwd"]', settings.web_pass)
     await page.click('input[type="submit"]')
 
     logger.info("log in succesful, going to video url")
-
     await page.goto(url, wait_until='domcontentloaded')
 
     #Search for the src selector that contains the vimeo.player of the video
@@ -159,10 +108,17 @@ async def download_from_url(browser: Browser, user: str, passw: str, url: str) -
     if not iframe:
         raise VideoNotFound(f'Vimeo iframe not found in page {url}')
 
-    video_Link = await iframe.get_attribute("src")
+    video_link = await iframe.get_attribute("src")
+
     await browser.close()
-    logger.info("getting video id")
-    id = get_id_video(video_Link)
-    logger.info(f"video id = {id}")
-    ctx.close()
-    return download_video_stream(id)
+    return get_id_video(video_link)
+
+
+async def download_from_url(url: str) -> Path:
+    video_id = get_video_id_from_url(url)
+    return download_video(video_id)
+
+
+async def download_from_url_stream(url: str) -> io.BufferedReader:
+    video_id = get_video_id_from_url(url)
+    return download_video_stream(video_id)
