@@ -5,7 +5,7 @@ from loguru import logger
 
 from src.api.webhook import router as wh_router, bot_webhook
 from src.api.dev import router as dev_router
-from src.scraper import Scraper
+from src.core.scraper import Scraper
 from src.settings import get_settings
 
 cfg = get_settings()
@@ -16,7 +16,7 @@ def get_webhook_path(application: FastAPI) -> str:
     try:
         webhook_route = [
             r for r in application.routes
-            if r.name == func_name and isinstance(r, APIRoute)
+            if isinstance(r, APIRoute) and r.name == func_name
         ][0]
     except IndexError:
         logger.error(f"Webhook path operation {func_name} not found. "

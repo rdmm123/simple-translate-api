@@ -33,13 +33,16 @@ async def set_webhook(my_bot: Bot, webhook_path: str) -> None:
             return webhook_info
         except Exception as e:
             logger.error(f"Can't get webhook info - {e}")
-            return
+            return None
 
     current_webhook_info = await check_webhook()
     webhook_url =f"{cfg.base_webhook_url}{webhook_path}"
 
     if cfg.debug:
         logger.debug(f"Current bot info: {current_webhook_info}")
+
+    if not current_webhook_info:
+        return
 
     if webhook_url == current_webhook_info.url:
         return
