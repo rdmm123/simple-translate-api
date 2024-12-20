@@ -1011,7 +1011,6 @@ dev = [
     { name = "mypy" },
     { name = "poethepoet" },
     { name = "types-boto3-custom" },
-    { name = "yt-dlp-types" },
 ]
 
 [package.metadata]
@@ -1033,7 +1032,6 @@ dev = [
     { name = "mypy", specifier = ">=1.13.0" },
     { name = "poethepoet", specifier = ">=0.31.1" },
     { name = "types-boto3-custom", path = "vendored/types_boto3_custom-1.35.82-py3-none-any.whl" },
-    { name = "yt-dlp-types", specifier = ">=0.0.13" },
 ]
 
 [[package]]
@@ -1318,13 +1316,4 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/60/5c/906972f44c2057c929c85b9b309bff51847a74aa9f82c7d8dfe350b13225/yt_dlp-2024.11.18.tar.gz", hash = "sha256:b8a4c23d3c9afd7e476bcdb87f38b6c0e8e12e3a239d7988f13acb434200f54d", size = 2908340 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/22/1918d2c8c123e9157efd7c2063ea89b4826f904d67b17e77152862ac3347/yt_dlp-2024.11.18-py3-none-any.whl", hash = "sha256:b9741695911dc566498b5f115cdd6b1abbc5be61cb01fd98abe649990a41656c", size = 3173165 },
-]
-
-[[package]]
-name = "yt-dlp-types"
-version = "0.0.13"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/87/31/0c893ec3a1eaf65821091018257a8a1a889a63ad5c9ff0675623499cee51/yt_dlp_types-0.0.13.tar.gz", hash = "sha256:a350258371aece1712a87c74fa6609188d40a70a90da891426ad5529a8e945f2", size = 13385 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/95/981c72c7b74ea41d2e17864f56c7c3272ab9ce86b1e47fc68d79c58aec45/yt_dlp_types-0.0.13-py3-none-any.whl", hash = "sha256:8f0fe4ce61c91f2692ec05e915e3366ac61c387cc30e5459fdd9f98ec18918d8", size = 13780 },
 ]

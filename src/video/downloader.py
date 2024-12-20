@@ -3,7 +3,7 @@ import subprocess
 from typing import Literal, overload, IO
 
 from pathlib import Path
-from yt_dlp import YoutubeDL, YDLOpts
+from yt_dlp import YoutubeDL
 from loguru import logger
 
 from src.core.scraper import Scraper
@@ -39,7 +39,7 @@ class Downloader:
         download_path = download_dir / 'video.mp4'
         download_path.unlink(missing_ok=True)
         #Setting yt-dlp to get video title
-        ydl_opts: YDLOpts = {
+        ydl_opts = {
             'format': 'bv+ba',
             'outtmpl': str(download_path),
             'quiet': True,
@@ -48,7 +48,7 @@ class Downloader:
         }
 
         with YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False) # type: ignore
+            info_dict = ydl.extract_info(url, download=False)
             video_title = info_dict.get('title', None)
             logger.info(f"Video found, downloading: {video_title}")
 

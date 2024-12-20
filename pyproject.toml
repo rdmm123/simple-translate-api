@@ -22,7 +22,6 @@ dev = [
     "mypy>=1.13.0",
     "poethepoet>=0.31.1",
     "types-boto3-custom",
-    "yt-dlp-types>=0.0.13",
 ]
 
 [tool.poe.tasks]
@@ -40,6 +39,10 @@ strict = true
 
 [[tool.mypy.overrides]]
 module = "ffmpeg.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "yt_dlp.*"
 ignore_missing_imports = true
 
 [tool.uv.sources]
