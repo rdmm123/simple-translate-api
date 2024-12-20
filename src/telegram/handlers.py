@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.utils.markdown import hbold
 from aiogram.types import Message
 
-from src.video.dowloader import Downloader
+from src.video.downloader import Downloader
 from src.settings import get_settings
 from src.core.s3_handler import S3Handler
 
