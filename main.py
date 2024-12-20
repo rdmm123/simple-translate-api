@@ -2,10 +2,11 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from contextlib import asynccontextmanager
 from loguru import logger
+from typing import AsyncGenerator
 
 from src.api.webhook import router as wh_router, bot_webhook
 from src.api.dev import router as dev_router
-from src.scraper import Scraper
+from src.core.scraper import Scraper
 from src.settings import get_settings
 
 cfg = get_settings()
@@ -16,7 +17,7 @@ def get_webhook_path(application: FastAPI) -> str:
     try:
         webhook_route = [
             r for r in application.routes
-            if r.name == func_name and isinstance(r, APIRoute)
+            if isinstance(r, APIRoute) and r.name == func_name
         ][0]
     except IndexError:
         logger.error(f"Webhook path operation {func_name} not found. "
@@ -26,7 +27,7 @@ def get_webhook_path(application: FastAPI) -> str:
     return webhook_route.path
 
 @asynccontextmanager
-async def lifespan(application: FastAPI):
+async def lifespan(application: FastAPI) -> AsyncGenerator[None]:
     logger.info("🚀 Starting application")
     from src.telegram.bot import start_telegram
     webhook_path = get_webhook_path(application)

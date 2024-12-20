@@ -19,8 +19,28 @@ dependencies = [
 dev = [
     "aws-cdk-lib>=2.173.1",
     "constructs>=10.4.2",
+    "mypy>=1.13.0",
     "poethepoet>=0.31.1",
+    "types-boto3-custom",
+    "yt-dlp-types>=0.0.13",
 ]
 
 [tool.poe.tasks]
 run = "fastapi dev"
+generate_aws_types = [
+    { cmd = "uvx mypy_boto3_builder ./vendored --download-static-stubs --product types-boto3-custom --output-type wheel --services lambda s3" },
+    { cmd = "uv add --dev vendored/types_boto3_custom-1.35.82-py3-none-any.whl" }
+]
+check_types = "mypy ."
+
+
+[tool.mypy]
+exclude = ["infra/*"]
+strict = true
+
+[[tool.mypy.overrides]]
+module = "ffmpeg.*"
+ignore_missing_imports = true
+
+[tool.uv.sources]
+types-boto3-custom = { path = "vendored/types_boto3_custom-1.35.82-py3-none-any.whl" }
