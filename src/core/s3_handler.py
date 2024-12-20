@@ -17,10 +17,9 @@ class S3Handler:
             cls._client = boto3.client("s3")
         return cls._client
 
-    def upload_file(self, file_path: Path) -> bool:
+    def upload_file(self, file_path: Path) -> None:
         client = self._get_client()
-        client.upload_file(str(file_path), self.bucket_name, 'video')
-        return True
+        client.upload_file(str(file_path), self.bucket_name, str('videos' / file_path))
 
     def upload_file_obj(self, file_obj: BinaryIO) -> None:
         client = self._get_client()

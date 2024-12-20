@@ -4,9 +4,6 @@ from aiogram.filters import CommandStart, Command
 from aiogram.utils.markdown import hbold
 from aiogram.types import Message
 
-from src.video.downloader import Downloader
-from src.settings import get_settings
-from src.core.s3_handler import S3Handler
 from src.video.translator import Translator
 
 from loguru import logger
@@ -29,11 +26,10 @@ async def cmd_start(message: Message) -> None:
 async def translate_video(message: types.Message) -> None:
     # TODO: Validate url first
     # TODO: check if video already in bucket first
-    settings = get_settings()
     translator = Translator()
 
     if not message.text:
         logger.warning(f"Invalid message received from telegram {message}")
         return
 
-    translator.translate_video(message.text)
+    await translator.translate_video(message.text)
