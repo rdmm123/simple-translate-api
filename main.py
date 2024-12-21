@@ -1,3 +1,4 @@
+import boto3
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from contextlib import asynccontextmanager
@@ -42,3 +43,4 @@ app.include_router(wh_router)
 
 if cfg.environment == 'dev':
     app.include_router(dev_router)
+    boto3.set_stream_logger('')

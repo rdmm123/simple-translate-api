@@ -22,11 +22,14 @@ class S3Handler:
             cls.client = boto3.client("s3")
         return cls.client
 
-    def upload_file(self, file_path: Path) -> None:
+    def upload_file(self, file_path: Path) -> str:
         assert self.client
+        key = f"videos/{file_path.name}"
+        logger.debug(f"Uploading file at {file_path} with key {key}")
         self.client.upload_file(
-            str(file_path), self.bucket_name, str("videos" / file_path)
+            str(file_path), self.bucket_name, key
         )
+        return key
 
     def list_buckets(self) -> list[BucketTypeDef]:
         assert self.client

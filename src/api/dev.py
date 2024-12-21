@@ -10,6 +10,7 @@ from fastapi import (
 )
 
 from src.dependencies import CompressorDep, DownloaderDep
+from src.core.s3_handler import S3Handler
 
 
 router = APIRouter(tags=["dev"], prefix="/dev")
@@ -50,3 +51,16 @@ def quick_compress(
 ) -> dict[str, str]:
     path = compressor.compress_video(body.input_path, 'path')
     return {"path": str(path)}
+
+
+class QuickUploadBody(BaseModel):
+    file_path: Path
+    key: str | None = None
+
+@router.post("/quick_upload")
+def quick_upload(
+    body: Annotated[QuickUploadBody, Body()]
+) -> dict[str, str]:
+    s3_handler = S3Handler()
+    key = s3_handler.upload_file(body.file_path)
+    return {"key": key}
