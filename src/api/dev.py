@@ -1,6 +1,7 @@
 from typing import Annotated, IO
 from pathlib import Path
 
+from pydantic import BaseModel
 from fastapi import (
     APIRouter,
     Body,
@@ -10,7 +11,9 @@ from fastapi import (
 
 from src.dependencies import CompressorDep, DownloaderDep
 
+
 router = APIRouter(tags=["dev"], prefix="/dev")
+
 
 @router.post("/quick_download")
 def quick_download(
@@ -18,10 +21,10 @@ def quick_download(
     compressor: CompressorDep,
     video_id: Annotated[int, Body()],
     stream: Annotated[bool, Body()] = True,
-
+    compress: Annotated[bool, Body()] = True
 ) -> dict[str, str]:
     out: IO[bytes] | Path | None = None
-    if stream:
+    if stream and compress:
         out = downloader.download_video_stream(video_id)
     else:
         out = downloader.download_video(video_id)
@@ -29,6 +32,21 @@ def quick_download(
     if not out:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No output")
 
-    path = compressor.compress_video(out, "path")
+    if compress:
+        path = compressor.compress_video(out, "path")
+    else:
+        path = out
 
+    return {"path": str(path)}
+
+
+class QuickCompressBody(BaseModel):
+    input_path: Path
+
+@router.post("/quick_compress")
+def quick_compress(
+    compressor: CompressorDep,
+    body: Annotated[QuickCompressBody, Body()]
+) -> dict[str, str]:
+    path = compressor.compress_video(body.input_path, 'path')
     return {"path": str(path)}
