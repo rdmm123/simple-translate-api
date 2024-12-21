@@ -128,10 +128,17 @@ class Downloader:
         return self.download_video_stream(video_id)
 
     @overload
-    async def download_from_url(self, url: HttpUrl, output_mode: Literal["path"], user_id: str) -> Path: ...
+    async def download_from_url(
+        self, url: HttpUrl, output_mode: Literal["path"], user_id: str
+    ) -> Path: ...
     @overload
-    async def download_from_url(self, url: HttpUrl, output_mode: Literal["pipe"], user_id: str) -> IO[bytes] | None: ...
-    async def download_from_url(self, url: HttpUrl, output_mode: Literal["path", "pipe"], user_id: str) -> Path | IO[bytes] | None:
+    async def download_from_url(
+        self, url: HttpUrl, output_mode: Literal["pipe"], user_id: str
+    ) -> IO[bytes] | None: ...
+
+    async def download_from_url(
+        self, url: HttpUrl, output_mode: Literal["path", "pipe"], user_id: str
+    ) -> Path | IO[bytes] | None:
         self._user_id = user_id
         if output_mode == "path":
             return await self._download_from_url(url, user_id)

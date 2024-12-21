@@ -1,5 +1,6 @@
 import ffmpeg
 import subprocess
+import threading
 
 from ffmpeg.nodes import FilterableStream, OutputStream
 from pathlib import Path
@@ -37,21 +38,35 @@ class Compressor:
             self._output_path.unlink(missing_ok=True)
             filename = str(self._output_path)
 
-        return ffmpeg.output(input, filename,
-            vcodec='libx264',
+        return ffmpeg.output(
+            input,
+            filename=filename,
+            vcodec="libx264",
             crf=23,
-            preset='medium',
-            acodec='aac',
-            audio_bitrate='128k'
+            preset="medium",
+            acodec="aac",
+            audio_bitrate="128k",
+            f="mp4",
+            # This is needed since mp4 needs to be seekable
+            # So we need to use a fragmented mp4 if we want to stream the output
+            movflags="+frag_keyframe+empty_moov" if mode == "pipe" else None,
         )
 
-    def _feed_input_pipe(self, input: IO[bytes], process: subprocess.Popen[bytes]) -> None:
-        try:
-            for chunk in iter(lambda: input.read(1024*1000), b""):
-                process.stdin and process.stdin.write(chunk)
-        finally:
-            process.stdin and process.stdin.close()
-            input.close()
+    def _feed_input_pipe(
+        self, input: IO[bytes], process: subprocess.Popen[bytes]
+    ) -> threading.Thread:
+        def feed_input(input: IO[bytes], process: subprocess.Popen[bytes]) -> None:
+            try:
+                for chunk in iter(lambda: input.read(1024 * 1000), b""):
+                    logger.debug("feeding bytes")
+                    process.stdin and process.stdin.write(chunk)
+            finally:
+                process.stdin and process.stdin.close()
+                input.close()
+
+        thread = threading.Thread(target=feed_input, args=(input, process))
+        thread.start()
+        return thread
 
     @overload
     def compress_video(
@@ -61,6 +76,7 @@ class Compressor:
     def compress_video(
         self, input: Path | IO[bytes], output_mode: Literal["pipe"]
     ) -> IO[bytes]: ...
+
     def compress_video(
         self, input: Path | IO[bytes], output_mode: Literal["path", "pipe"]
     ) -> Path | IO[bytes]:
@@ -73,16 +89,18 @@ class Compressor:
         process: subprocess.Popen[bytes] = ffmpeg.run_async(
             output_stream,
             pipe_stdin=(not input_is_path),
+            pipe_stdout=output_mode == 'pipe',
             quiet=self._settings.environment != "dev",
         )
 
         if not input_is_path:
             logger.debug("Feeding input to process stdin")
-            self._feed_input_pipe(cast(IO[bytes], input), process)
+            thread = self._feed_input_pipe(cast(IO[bytes], input), process)
 
         if output_mode == "path":
             logger.debug("Waiting for ffmpeg process to finalize")
             process.wait()
+            thread.join()
             assert self._output_path, "No output path for compressing"
             return self._output_path
 

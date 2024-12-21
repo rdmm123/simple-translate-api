@@ -38,6 +38,9 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None]:
     await scraper.close()
     logger.info("⛔ Stopping application")
 
+# TODO: Try this pattern
+# https://www.reddit.com/r/Python/comments/13g4ml1/do_you_use_singletons/
+
 app = FastAPI(lifespan=lifespan)
 app.include_router(wh_router)
 

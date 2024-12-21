@@ -50,13 +50,25 @@ def quick_download(
 
 class QuickCompressBody(BaseModel):
     input_path: Path
+    stream: bool = False
 
 @router.post("/quick_compress")
 def quick_compress(
     compressor: CompressorDep,
     body: Annotated[QuickCompressBody, Body()]
 ) -> dict[str, str]:
-    path = compressor.compress_video(body.input_path, 'path')
+    out = compressor.compress_video(body.input_path, 'pipe' if body.stream else 'path')
+
+    if body.stream:
+        path = Path("/tmp/output.mp4")
+        path.unlink(missing_ok=True)
+
+        with path.open("wb") as f:
+            for chunk in iter(lambda: out.read(1024), b""):
+                f.write(chunk)
+    else:
+        path = out
+
     return {"path": str(path)}
 
 
