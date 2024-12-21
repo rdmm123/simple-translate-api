@@ -30,12 +30,12 @@ class Compressor:
             filename = "pipe:"
 
         elif mode == "path":
-            self.output_path = (
+            self._output_path = (
                 self._input_path.parent / f'compressed_{self._input_path.stem}.mp4'
                 if self._input_path else self.DEFAULT_OUTPUT
             )
-            self.output_path.unlink(missing_ok=True)
-            filename = str(self.output_path)
+            self._output_path.unlink(missing_ok=True)
+            filename = str(self._output_path)
 
         return ffmpeg.output(input, filename,
             vcodec='libx264',

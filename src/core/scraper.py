@@ -1,4 +1,6 @@
 from __future__ import annotations
+from typing import AsyncGenerator
+from contextlib import asynccontextmanager
 from playwright.async_api import async_playwright, Playwright, Browser
 
 
@@ -24,11 +26,16 @@ class Scraper:
             await self.playwright.stop()
             self.playwright = None
 
-    async def get_browser(self) -> Browser:
-        if not self._browser:
-            assert self.playwright
-            self._browser = await self.playwright.chromium.launch(
-                headless=True
-            )
-        return self._browser
+    @asynccontextmanager
+    async def get_browser(self) -> AsyncGenerator[Browser]:
+        try:
+            if not self._browser:
+                assert self.playwright
+                self._browser = await self.playwright.chromium.launch(
+                    headless=True
+                )
+            yield self._browser
+        finally:
+            self._browser.close()
+            self._browser = None
 

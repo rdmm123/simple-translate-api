@@ -86,30 +86,28 @@ class Downloader:
 
     async def _get_video_id_from_url(self, url: str) -> int:
         scraper = await Scraper.create()
-        browser = await scraper.get_browser()
 
-        page = await browser.new_page()
+        async with scraper.get_browser() as browser:
+            page = await browser.new_page()
 
-        logger.info("logging in")
-        #the first URL (the login page)
-        await page.goto(LOGIN_URL, wait_until='domcontentloaded')
-        await page.wait_for_timeout(1_000)
-        #Complete the login form
-        await page.fill('input[name="log"]', settings.web_user)
-        await page.fill('input[name="pwd"]', settings.web_pass)
-        await page.click('input[type="submit"]')
+            logger.info("logging in")
+            #the first URL (the login page)
+            await page.goto(LOGIN_URL, wait_until='domcontentloaded')
+            await page.wait_for_timeout(1_000)
+            #Complete the login form
+            await page.fill('input[name="log"]', settings.web_user)
+            await page.fill('input[name="pwd"]', settings.web_pass)
+            await page.click('input[type="submit"]')
 
-        logger.info("log in succesful, going to video url")
-        await page.goto(url, wait_until='domcontentloaded')
+            logger.info("log in succesful, going to video url")
+            await page.goto(url, wait_until='domcontentloaded')
 
-        #Search for the src selector that contains the vimeo.player of the video
-        if not (iframe := await page.query_selector("iframe[src*='vimeo.com']")):
-            raise VideoNotFound(f'Vimeo iframe not found in page {url}')
+            #Search for the src selector that contains the vimeo.player of the video
+            if not (iframe := await page.query_selector("iframe[src*='vimeo.com']")):
+                raise VideoNotFound(f'Vimeo iframe not found in page {url}')
 
-        if not (video_link := await iframe.get_attribute("src")):
-            raise VideoNotFound(f"Video url not found in page {url}")
-
-        await browser.close()
+            if not (video_link := await iframe.get_attribute("src")):
+                raise VideoNotFound(f"Video url not found in page {url}")
 
         if not (video_id := self._get_video_id(video_link)):
             raise VideoNotFound(f"Video id not found in {video_link}")
