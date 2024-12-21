@@ -9,14 +9,16 @@ from loguru import logger
 from src.core.scraper import Scraper
 from src.settings import get_settings
 
-# TODO: Download, compress and upload chunk by chunk
 
 LOGIN_URL = 'https://autismpartnershipfoundation.org/log-in/'
 VIMEO_ID_URL = 'https://vimeo.com/{id}'
 
+settings = get_settings()
+
 
 class VideoNotFound(Exception):
     pass
+
 
 class Downloader:
     def _get_video_id(self, url: str) -> int | None:
@@ -43,8 +45,7 @@ class Downloader:
             'format': 'bv+ba',
             'outtmpl': str(download_path),
             'quiet': True,
-            'no_warnings': True,
-            'logger': logger
+            'no_warnings': True
         }
 
         with YoutubeDL(ydl_opts) as ydl:
@@ -77,7 +78,7 @@ class Downloader:
             args,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL # don't fill up server logs
+            stderr=subprocess.DEVNULL if settings.environment != 'dev' else None
         )
 
         return downloader_proc.stdout
@@ -86,7 +87,6 @@ class Downloader:
     async def _get_video_id_from_url(self, url: str) -> int:
         scraper = await Scraper.create()
         browser = await scraper.get_browser()
-        settings = get_settings()
 
         page = await browser.new_page()
 

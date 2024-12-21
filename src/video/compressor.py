@@ -4,14 +4,17 @@ import subprocess
 from ffmpeg.nodes import FilterableStream, OutputStream
 from pathlib import Path
 from typing import overload, Literal, cast, IO
+from src.settings import get_settings
 
 from loguru import logger
+
 
 class Compressor:
     DEFAULT_OUTPUT = Path("/tmp/output.mp4")
     def __init__(self) -> None:
         self._input_path: Path | None = None
         self._output_path: Path | None = None
+        self._settings = get_settings()
 
     def _get_input(self, input: Path | IO[bytes]) -> FilterableStream:
         if isinstance(input, Path):
@@ -28,7 +31,7 @@ class Compressor:
 
         elif mode == "path":
             self.output_path = (
-                self._input_path.parent / f'compressed_{self._input_path.name}'
+                self._input_path.parent / f'compressed_{self._input_path.stem}.mp4'
                 if self._input_path else self.DEFAULT_OUTPUT
             )
             self.output_path.unlink(missing_ok=True)
@@ -67,7 +70,11 @@ class Compressor:
         input_stream = self._get_input(input)
         output_stream = self._get_output(input_stream, output_mode)
 
-        process: subprocess.Popen[bytes] = ffmpeg.run_async(output_stream, pipe_stdin=(not input_is_path), quiet=True)
+        process: subprocess.Popen[bytes] = ffmpeg.run_async(
+            output_stream,
+            pipe_stdin=(not input_is_path),
+            quiet=self._settings.environment != "dev",
+        )
 
         if not input_is_path:
             logger.debug("Feeding input to process stdin")

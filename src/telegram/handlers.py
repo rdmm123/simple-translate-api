@@ -24,8 +24,6 @@ async def cmd_start(message: Message) -> None:
 
 @router.message()
 async def translate_video(message: types.Message) -> None:
-    # TODO: Validate url first
-    # TODO: check if video already in bucket first
     translator = Translator()
 
     if not message.text:
