@@ -34,4 +34,4 @@ async def translate_video(message: types.Message) -> None:
         logger.warning(f"No user found in message {message}")
         return
 
-    await translator.translate_video(message.text, message.from_user.id)
+    await translator.translate_video(message.text, str(message.from_user.id))

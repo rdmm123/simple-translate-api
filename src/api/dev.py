@@ -30,8 +30,12 @@ def quick_download(
         out = downloader.download_video_stream(video_id)
     else:
         if not user_id:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No user id")
-        out = downloader.download_video(video_id, user_id=user_id)
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No user id"
+            )
+        out = downloader.download_video(
+            video_id, user_id=user_id, filename=f"{user_id}_{video_id}"
+        )
 
     if not out:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No output")

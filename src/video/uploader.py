@@ -9,7 +9,9 @@ class Uploader:
         self._s3_handler = S3Handler()
 
     def upload_video(self, file_path: Path, user_id: str):
-        self._s3_handler.upload_file(file_path, self.VIDEO_KEY.format(user_id=user_id, filename={}))
+        self._s3_handler.upload_file(
+            file_path, self.VIDEO_KEY.format(user_id=user_id, filename=file_path.name)
+        )
 
     def upload_video_stream(self):
         pass

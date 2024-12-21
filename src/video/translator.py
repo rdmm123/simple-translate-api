@@ -19,7 +19,7 @@ class Translator:
         return None
 
     async def translate_video(self, url: str, user_id: str) -> None:
-        if not validate_url(url):
+        if not (url_obj := validate_url(url)):
             # TODO: send telegram message indicating that url isn't valid
             logger.warning(f"Invalid url received {url}")
             return
@@ -30,12 +30,12 @@ class Translator:
         logger.info(f"Translating video at {url}")
         if self._settings.environment == 'dev':
             video_path = await self._downloader.download_from_url(
-                url,
+                url_obj,
                 output_mode="path",
                 user_id=user_id
             )
             compressed_path = self._compressor.compress_video(video_path, output_mode="path")
-            self._uploader.upload_video(compressed_path)
+            self._uploader.upload_video(compressed_path, user_id)
         else:
             # TODO: call another lambda to do the dowloading
             pass

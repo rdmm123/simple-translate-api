@@ -1,5 +1,6 @@
 from pydantic import TypeAdapter, HttpUrl, ValidationError
 
+
 def validate_url(url: str) -> HttpUrl | None:
     url_adapter = TypeAdapter(HttpUrl)
 
@@ -9,3 +10,8 @@ def validate_url(url: str) -> HttpUrl | None:
         return None
 
     return url_valid
+
+
+def url_to_filename(url: HttpUrl) -> str:
+    return (url.host + url.path).strip("/").replace("/", "-").replace(".", "_")
+

@@ -6,8 +6,10 @@ from tempfile import mkdtemp
 from pathlib import Path
 from yt_dlp import YoutubeDL
 from loguru import logger
+from pydantic import HttpUrl
 
 from src.core.scraper import Scraper
+from src.core.helpers import url_to_filename
 from src.settings import get_settings
 
 
@@ -31,14 +33,15 @@ class Downloader:
             return None  # If the ID is not found
 
 
-    def download_video(self, id: int, user_id: str) -> Path:
+    def download_video(self, id: int, user_id: str, filename: str) -> Path:
         #Path where the downloaded video will be saved
         download_dir = Path(mkdtemp(prefix=user_id, dir="/tmp")) # TODO: Replace with TemporaryDirectory
 
         url = VIMEO_ID_URL.format(id=id)
-        logger.info(f"Downloading video at {url}")
 
-        download_path = download_dir / 'video.mp4'
+        download_path = download_dir / f'{filename}.mp4'
+
+        logger.debug(f"Downloading video at {url} to {download_path}")
         download_path.unlink(missing_ok=True)
         #Setting yt-dlp to get video title
         ydl_opts = {
@@ -49,7 +52,7 @@ class Downloader:
         }
 
         with YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)
+            info_dict = ydl.extract_info(str(url), download=False)
             video_title = info_dict.get('title', None)
             logger.info(f"Video found, downloading: {video_title}")
 
@@ -63,7 +66,7 @@ class Downloader:
     def download_video_stream(self, id: int) -> IO[bytes] | None:
         #Path where the downloaded video will be saved
         url = VIMEO_ID_URL.format(id=id)
-        logger.info(f"Downloading video at {url}")
+        logger.debug(f"Downloading video at {url}")
 
         args = [
             # request to download with video ID
@@ -84,7 +87,7 @@ class Downloader:
         return downloader_proc.stdout
 
 
-    async def _get_video_id_from_url(self, url: str) -> int:
+    async def _get_video_id_from_url(self, url: HttpUrl) -> int:
         scraper = await Scraper.create()
 
         async with scraper.get_browser() as browser:
@@ -100,7 +103,7 @@ class Downloader:
             await page.click('input[type="submit"]')
 
             logger.info("log in succesful, going to video url")
-            await page.goto(url, wait_until='domcontentloaded')
+            await page.goto(str(url), wait_until='domcontentloaded')
 
             #Search for the src selector that contains the vimeo.player of the video
             if not (iframe := await page.query_selector("iframe[src*='vimeo.com']")):
@@ -115,20 +118,20 @@ class Downloader:
         return video_id
 
 
-    async def _download_from_url(self, url: str, user_id: str) -> Path:
+    async def _download_from_url(self, url: HttpUrl, user_id: str) -> Path:
         video_id = await self._get_video_id_from_url(url)
-        return self.download_video(video_id, user_id)
+        return self.download_video(video_id, user_id, url_to_filename(url))
 
 
-    async def _download_from_url_stream(self, url: str) -> IO[bytes] | None:
+    async def _download_from_url_stream(self, url: HttpUrl) -> IO[bytes] | None:
         video_id = await self._get_video_id_from_url(url)
         return self.download_video_stream(video_id)
 
     @overload
-    async def download_from_url(self, url: str, output_mode: Literal["path"], user_id: str) -> Path: ...
+    async def download_from_url(self, url: HttpUrl, output_mode: Literal["path"], user_id: str) -> Path: ...
     @overload
-    async def download_from_url(self, url: str, output_mode: Literal["pipe"], user_id: str) -> IO[bytes] | None: ...
-    async def download_from_url(self, url: str, output_mode: Literal["path", "pipe"], user_id: str) -> Path | IO[bytes] | None:
+    async def download_from_url(self, url: HttpUrl, output_mode: Literal["pipe"], user_id: str) -> IO[bytes] | None: ...
+    async def download_from_url(self, url: HttpUrl, output_mode: Literal["path", "pipe"], user_id: str) -> Path | IO[bytes] | None:
         self._user_id = user_id
         if output_mode == "path":
             return await self._download_from_url(url, user_id)
