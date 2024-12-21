@@ -1,5 +1,5 @@
 import boto3
-
+from typing import IO, Any
 from pathlib import Path
 from types_boto3_s3.client import S3Client
 from types_boto3_s3.type_defs import BucketTypeDef
@@ -22,14 +22,18 @@ class S3Handler:
             cls.client = boto3.client("s3")
         return cls.client
 
-    def upload_file(self, file_path: Path) -> str:
+    def upload_file(self, file_path: Path, key: str) -> str:
         assert self.client
-        key = f"videos/{file_path.name}"
         logger.debug(f"Uploading file at {file_path} with key {key}")
-        self.client.upload_file(
-            str(file_path), self.bucket_name, key
-        )
+        self.client.upload_file(str(file_path), self.bucket_name, key)
         return key
+
+    def upload_file_obj(self, file_obj: IO[Any], key: str) -> str:
+        assert self.client
+        logger.debug(f"Uploading file_obj with key {key}")
+        self.client.upload_fileobj(file_obj, self.bucket_name, key)
+        return key
+
 
     def list_buckets(self) -> list[BucketTypeDef]:
         assert self.client

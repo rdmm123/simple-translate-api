@@ -30,4 +30,8 @@ async def translate_video(message: types.Message) -> None:
         logger.warning(f"Invalid message received from telegram {message}")
         return
 
-    await translator.translate_video(message.text)
+    if not message.from_user:
+        logger.warning(f"No user found in message {message}")
+        return
+
+    await translator.translate_video(message.text, message.from_user.id)

@@ -21,14 +21,17 @@ def quick_download(
     downloader: DownloaderDep,
     compressor: CompressorDep,
     video_id: Annotated[int, Body()],
+    user_id: Annotated[str | None, Body()] = None,
     stream: Annotated[bool, Body()] = True,
-    compress: Annotated[bool, Body()] = True
+    compress: Annotated[bool, Body()] = True,
 ) -> dict[str, str]:
     out: IO[bytes] | Path | None = None
     if stream and compress:
         out = downloader.download_video_stream(video_id)
     else:
-        out = downloader.download_video(video_id)
+        if not user_id:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No user id")
+        out = downloader.download_video(video_id, user_id=user_id)
 
     if not out:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No output")
