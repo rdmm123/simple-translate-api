@@ -36,6 +36,7 @@ class Scraper:
                 )
             yield self._browser
         finally:
-            self._browser.close()
+            if self._browser:
+                await self._browser.close()
             self._browser = None
 

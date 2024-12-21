@@ -1,4 +1,4 @@
-from typing import Annotated, IO
+from typing import Annotated, IO, cast
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -35,7 +35,7 @@ def quick_download(
     if compress:
         path = compressor.compress_video(out, "path")
     else:
-        path = out
+        path = cast(Path, out)
 
     return {"path": str(path)}
 
