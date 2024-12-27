@@ -30,7 +30,7 @@ async def send_webhook_update(update: Update, bot: Bot, dp: Dispatcher) -> None:
     await dp.feed_webhook_update(bot=bot, update=update)
 
 
-@router.post("/", dependencies=[Depends(validate_webhook)])
+@router.post("", dependencies=[Depends(validate_webhook)])
 async def bot_webhook(
     update: Update,
     backgrund_tasks: BackgroundTasks,

@@ -5,15 +5,18 @@ from contextlib import asynccontextmanager
 from loguru import logger
 from typing import AsyncGenerator
 
-from src.api.webhook import router as wh_router, bot_webhook
-from src.api.dev import router as dev_router
+from src.api import (
+    webhook,
+    dev,
+    health
+)
 from src.core.scraper import Scraper
 from src.settings import get_settings
 
 cfg = get_settings()
 
 def get_webhook_path(application: FastAPI) -> str:
-    func_name = bot_webhook.__name__
+    func_name = webhook.bot_webhook.__name__
 
     try:
         webhook_route = [
@@ -42,8 +45,13 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None]:
 # https://www.reddit.com/r/Python/comments/13g4ml1/do_you_use_singletons/
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(wh_router)
+app.include_router(webhook.router)
+app.include_router(health.router)
 
 if cfg.environment == 'dev':
-    app.include_router(dev_router)
+    app.include_router(dev.router)
     boto3.set_stream_logger('')
+
+if cfg.runtime == 'lambda':
+    from mangum import Mangum
+    handler = Mangum(app, lifespan="on")

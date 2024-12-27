@@ -3,7 +3,9 @@ from aws_cdk import (
     aws_s3 as s3,
     RemovalPolicy,
     Duration,
-    CfnOutput
+    CfnOutput,
+    aws_lambda,
+    aws_ecr_assets as ecr_assets
 )
 from constructs import Construct
 
@@ -21,5 +23,12 @@ class SimpleTranslateStack(Stack):
                 s3.LifecycleRule(expiration=Duration.days(30))
             ]
         )
-
         CfnOutput(self, "BucketNameOutput", value=bucket.bucket_name)
+
+        docker_image = ecr_assets.DockerImageAsset(self, "SimpleTranslateImage")
+        function = aws_lambda.Function(
+            self,
+            "SimpleTranslateApi",
+            code=aws_lambda.DockerImageCode.from_image_asset(docker_image),
+        )
+        bucket.grant_read_write(function)

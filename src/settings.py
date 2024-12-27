@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     webhook_auth_token: str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'  # Additional security token for webhook
     web_user: str = 'user'
     web_pass: str = 'pass'
-    environment: Literal['dev', 'docker', 'prd'] = 'dev'
+    runtime: Literal['server', 'lambda'] = 'server'
+    environment: Literal['dev', 'prd'] = 'dev'
     s3_bucket_name: str = 'bucket-name'
 
 

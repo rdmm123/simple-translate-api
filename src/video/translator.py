@@ -50,8 +50,8 @@ class Translator:
             return
 
         logger.info(f"Translating video at {url}")
-        if self._settings.environment == 'dev':
+        if self._settings.runtime == 'server':
             await self._translate_stream(url_obj, user_id)
-        else:
+        elif self._settings.runtime == 'lambda':
             # TODO: call another lambda to do the dowloading
-            pass
+            await self._translate_stream(url_obj, user_id)

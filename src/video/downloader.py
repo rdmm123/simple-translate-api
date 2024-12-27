@@ -35,7 +35,7 @@ class Downloader:
 
     def download_video(self, id: int, user_id: str, filename: str) -> Path:
         #Path where the downloaded video will be saved
-        download_dir = Path(mkdtemp(prefix=user_id, dir="/tmp")) # TODO: Replace with TemporaryDirectory
+        download_dir = Path(mkdtemp(prefix=user_id, dir="/tmp"))
 
         url = VIMEO_ID_URL.format(id=id)
 

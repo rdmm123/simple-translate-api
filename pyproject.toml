@@ -13,6 +13,7 @@ dependencies = [
     "playwright>=1.49.0",
     "pydantic-settings>=2.6.1",
     "yt-dlp>=2024.11.18",
+    "types-boto3-custom",
 ]
 
 [dependency-groups]
@@ -21,14 +22,17 @@ dev = [
     "constructs>=10.4.2",
     "mypy>=1.13.0",
     "poethepoet>=0.31.1",
-    "types-boto3-custom",
+]
+lambda = [
+    "awslambdaric>=3.0.0",
+    "mangum>=0.19.0",
 ]
 
 [tool.poe.tasks]
 run = "fastapi dev"
 generate_aws_types = [
     { cmd = "uvx mypy_boto3_builder ./vendored --download-static-stubs --product types-boto3-custom --output-type wheel --services lambda s3" },
-    { cmd = "uv add --dev vendored/types_boto3_custom-1.35.82-py3-none-any.whl" }
+    { cmd = "uv add vendored/types_boto3_custom-1.35.82-py3-none-any.whl" }
 ]
 check_types = "mypy ."
 

@@ -1,0 +1,49 @@
+services:
+  st-api:
+    container_name: st-api
+    image: st-api
+    build:
+      dockerfile: ./Dockerfile.dev
+      context: .
+    ports:
+      - "5432:8000"
+    env_file: ".env"
+    environment:
+      - AWS_PROFILE=admin
+    volumes:
+      - "$HOME/.aws:/root/.aws:ro"
+    develop:
+      watch:
+        - path: ./src
+          action: sync
+          target: /app/src
+        - path: ./uv.lock
+          action: rebuild
+    tty: true
+    profiles:
+      - dev
+
+  st-api-lambda:
+    container_name: st-api-lambda
+    image: st-api-lambda
+    build:
+      target: local_dev
+      context: .
+    ports:
+      - "5433:8080"
+    env_file: ".env"
+    environment:
+      - RUNTIME=lambda
+      - AWS_PROFILE=admin
+    volumes:
+      - "$HOME/.aws:/root/.aws:ro"
+    develop:
+      watch:
+        - path: ./src
+          action: sync+restart
+          target: /app/src
+        - path: ./uv.lock
+          action: rebuild
+    tty: true
+    profiles:
+      - lambda
