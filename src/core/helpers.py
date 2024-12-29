@@ -13,5 +13,15 @@ def validate_url(url: str) -> HttpUrl | None:
 
 
 def url_to_filename(url: HttpUrl) -> str:
-    return (url.host + url.path).strip("/").replace("/", "-").replace(".", "_")
+    filename = ""
+
+    assert url.host or url.path, "Url must have one of: host, path"
+
+    if url.host is not None:
+        filename += url.host
+
+    if url.path is not None:
+        filename += url.path
+
+    return filename.strip("/").replace("/", "-").replace(".", "_")
 

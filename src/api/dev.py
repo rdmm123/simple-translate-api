@@ -1,4 +1,4 @@
-from typing import Annotated, IO, cast
+from typing import Annotated, IO, cast, Literal
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -57,9 +57,11 @@ def quick_compress(
     compressor: CompressorDep,
     body: Annotated[QuickCompressBody, Body()]
 ) -> dict[str, str]:
-    out = compressor.compress_video(body.input_path, 'pipe' if body.stream else 'path')
+    output_mode: Literal['path'] | Literal['pipe'] = 'pipe' if body.stream else 'path'
+    out = compressor.compress_video(body.input_path, output_mode)
 
     if body.stream:
+        out = cast(IO[bytes], out)
         path = Path("/tmp/output.mp4")
         path.unlink(missing_ok=True)
 
@@ -67,7 +69,7 @@ def quick_compress(
             for chunk in iter(lambda: out.read(1024), b""):
                 f.write(chunk)
     else:
-        path = out
+        path = cast(Path, out)
 
     return {"path": str(path)}
 
@@ -81,5 +83,5 @@ def quick_upload(
     body: Annotated[QuickUploadBody, Body()]
 ) -> dict[str, str]:
     s3_handler = S3Handler()
-    key = s3_handler.upload_file(body.file_path)
+    key = s3_handler.upload_file(body.file_path, f"quick_uploads/{str(body.file_path)}")
     return {"key": key}

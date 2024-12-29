@@ -33,6 +33,7 @@ class Translator:
         download_stream = await self._downloader.download_from_url(
             url, output_mode="pipe", user_id=user_id
         )
+        assert download_stream is not None, "No download stream found"
         compression_stream = self._compressor.compress_video(
             download_stream, output_mode="pipe"
         )
