@@ -73,8 +73,10 @@ async def set_bot_commands_menu(my_bot: Bot) -> None:
         logger.error(f"Can't set commands - {e}")
 
 
-async def start_telegram(webwook_path: str) -> None:
+async def start_telegram(webwook_path: str | None = None) -> None:
     bot = get_bot()
     get_dispatcher()
-    await set_webhook(bot, webwook_path)
-    await set_bot_commands_menu(bot)
+
+    if webwook_path:
+        await set_webhook(bot, webwook_path)
+        await set_bot_commands_menu(bot)

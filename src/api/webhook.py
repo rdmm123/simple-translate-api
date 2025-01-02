@@ -11,8 +11,7 @@ from fastapi import (
     status,
 )
 
-from src.dependencies import SettingsDep
-from src.telegram.bot import get_bot, get_dispatcher
+from src.dependencies import SettingsDep, BotDep, DispatcherDep
 
 
 router = APIRouter(tags=["webhook"], prefix="/webhook")
@@ -34,8 +33,8 @@ async def send_webhook_update(update: Update, bot: Bot, dp: Dispatcher) -> None:
 async def bot_webhook(
     update: Update,
     backgrund_tasks: BackgroundTasks,
-    bot: Annotated[Bot, Depends(get_bot)],
-    dp: Annotated[Dispatcher, Depends(get_dispatcher)],
+    bot: BotDep,
+    dp: DispatcherDep,
 ) -> None:
     # Use background task to not delay response
     backgrund_tasks.add_task(send_webhook_update, update, bot, dp)
