@@ -27,7 +27,7 @@ services:
     container_name: st-api-lambda
     image: st-api-lambda
     build:
-      target: local_dev
+      dockerfile: src/functions/api/Dockerfile
       context: .
     ports:
       - "5433:8080"
@@ -41,7 +41,7 @@ services:
       watch:
         - path: ./src
           action: sync+restart
-          target: /app/src
+          target: /var/task/src
         - path: ./uv.lock
           action: rebuild
     tty: true
