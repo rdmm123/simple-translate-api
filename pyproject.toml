@@ -5,15 +5,27 @@ description = "FastAPI server for downloading and translating videos"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "aiogram>=3.15.0",
     "boto3>=1.35.82",
-    "fastapi[standard]>=0.115.5",
-    "ffmpeg-python>=0.2.0",
     "loguru>=0.7.2",
-    "playwright>=1.49.0",
     "pydantic-settings>=2.6.1",
-    "yt-dlp>=2024.11.18",
     "types-boto3-custom",
+]
+
+[project.optional-dependencies]
+lambda = [
+    "awslambdaric>=3.0.0",
+]
+api = [
+    "fastapi[standard]>=0.115.5",
+    "mangum>=0.19.0",
+]
+video = [
+    "ffmpeg-python>=0.2.0",
+    "yt-dlp>=2024.11.18",
+    "playwright>=1.49.0",
+]
+telegram = [
+    "aiogram>=3.15.0",
 ]
 
 [dependency-groups]
@@ -23,10 +35,6 @@ dev = [
     "mypy>=1.13.0",
     "poethepoet>=0.31.1",
 ]
-lambda = [
-    "awslambdaric>=3.0.0",
-    "mangum>=0.19.0",
-]
 
 [tool.poe.tasks]
 run = "fastapi dev"
@@ -35,6 +43,7 @@ generate_aws_types = [
     { cmd = "uv add vendored/types_boto3_custom-1.35.82-py3-none-any.whl" }
 ]
 check_types = "mypy ."
+install = 'uv sync --all-extras'
 
 
 [tool.mypy]

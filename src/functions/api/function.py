@@ -4,7 +4,7 @@ from loguru import logger
 from mangum import Mangum
 from typing import AsyncGenerator
 
-from src.app import create_app, get_webhook_path
+from src.app import create_app
 from src.settings import get_settings
 
 cfg = get_settings()
@@ -14,8 +14,7 @@ cfg = get_settings()
 async def lifespan(application: FastAPI) -> AsyncGenerator[None]:
     logger.info("🚀 Starting application")
     from src.telegram.bot import start_telegram
-    webhook_path = get_webhook_path(application)
-    await start_telegram(webhook_path)
+    await start_telegram()
     yield
     logger.info("⛔ Stopping application")
 

@@ -11,13 +11,13 @@ RUN uvx playwright install --with-deps chromium
 RUN --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=vendored/,target=vendored/ \
-    uv sync --frozen --no-install-project --no-dev --group lambda
+    uv sync --frozen --no-install-project --no-dev --all-extras
 
 COPY pyproject.toml main.py uv.lock ./
 COPY src ./src
 
 RUN --mount=type=bind,source=vendored/,target=vendored/ \
-    uv sync --frozen --no-dev --group lambda
+    uv sync --frozen --no-dev --all-extras
 
 FROM base as local_dev
 

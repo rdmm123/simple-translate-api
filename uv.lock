@@ -1024,14 +1024,26 @@ name = "simple-translate-api"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "aiogram" },
     { name = "boto3" },
-    { name = "fastapi", extra = ["standard"] },
-    { name = "ffmpeg-python" },
     { name = "loguru" },
-    { name = "playwright" },
     { name = "pydantic-settings" },
     { name = "types-boto3-custom" },
+]
+
+[package.optional-dependencies]
+api = [
+    { name = "fastapi", extra = ["standard"] },
+    { name = "mangum" },
+]
+lambda = [
+    { name = "awslambdaric" },
+]
+telegram = [
+    { name = "aiogram" },
+]
+video = [
+    { name = "ffmpeg-python" },
+    { name = "playwright" },
     { name = "yt-dlp" },
 ]
 
@@ -1042,22 +1054,20 @@ dev = [
     { name = "mypy" },
     { name = "poethepoet" },
 ]
-lambda = [
-    { name = "awslambdaric" },
-    { name = "mangum" },
-]
 
 [package.metadata]
 requires-dist = [
-    { name = "aiogram", specifier = ">=3.15.0" },
+    { name = "aiogram", marker = "extra == 'telegram'", specifier = ">=3.15.0" },
+    { name = "awslambdaric", marker = "extra == 'lambda'", specifier = ">=3.0.0" },
     { name = "boto3", specifier = ">=1.35.82" },
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.5" },
-    { name = "ffmpeg-python", specifier = ">=0.2.0" },
+    { name = "fastapi", extras = ["standard"], marker = "extra == 'api'", specifier = ">=0.115.5" },
+    { name = "ffmpeg-python", marker = "extra == 'video'", specifier = ">=0.2.0" },
     { name = "loguru", specifier = ">=0.7.2" },
-    { name = "playwright", specifier = ">=1.49.0" },
+    { name = "mangum", marker = "extra == 'api'", specifier = ">=0.19.0" },
+    { name = "playwright", marker = "extra == 'video'", specifier = ">=1.49.0" },
     { name = "pydantic-settings", specifier = ">=2.6.1" },
     { name = "types-boto3-custom", path = "vendored/types_boto3_custom-1.35.82-py3-none-any.whl" },
-    { name = "yt-dlp", specifier = ">=2024.11.18" },
+    { name = "yt-dlp", marker = "extra == 'video'", specifier = ">=2024.11.18" },
 ]
 
 [package.metadata.requires-dev]
@@ -1066,10 +1076,6 @@ dev = [
     { name = "constructs", specifier = ">=10.4.2" },
     { name = "mypy", specifier = ">=1.13.0" },
     { name = "poethepoet", specifier = ">=0.31.1" },
-]
-lambda = [
-    { name = "awslambdaric", specifier = ">=3.0.0" },
-    { name = "mangum", specifier = ">=0.19.0" },
 ]
 
 [[package]]
