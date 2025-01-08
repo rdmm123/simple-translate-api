@@ -12,6 +12,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
 
 COPY pyproject.toml main.py uv.lock ./
 COPY src ./src
+COPY functions/api/function.py ./function.py
 
 RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
     --mount=type=bind,source=vendored/,target=vendored/ \
@@ -22,4 +23,4 @@ FROM public.ecr.aws/lambda/python:3.13
 COPY --from=builder /app .
 COPY --from=builder /var/lang /var/lang
 
-CMD ["src.functions.api.function.handler"]
+CMD ["function.handler"]

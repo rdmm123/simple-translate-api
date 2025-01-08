@@ -27,7 +27,7 @@ services:
     container_name: st-api-lambda
     image: st-api-lambda
     build:
-      dockerfile: src/functions/api/Dockerfile
+      dockerfile: functions/api/Dockerfile
       context: .
     ports:
       - "5433:8080"
