@@ -22,5 +22,5 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None]:
 # TODO: Try this pattern
 # https://www.reddit.com/r/Python/comments/13g4ml1/do_you_use_singletons/
 
-app = create_app(cfg, lifespan)
+app = create_app(cfg, lifespan, include_dev_routes=False)
 handler = Mangum(app, lifespan="on")

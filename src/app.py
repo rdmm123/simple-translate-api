@@ -7,21 +7,23 @@ from loguru import logger
 
 from src.api import (
     webhook,
-    dev,
     health
 )
 
 
 def create_app(
     settings: BaseSettings,
-    lifespan: AsyncGenerator[None] | None = None
+    lifespan: AsyncGenerator[None] | None = None,
+    include_dev_routes: bool = True
 ) -> FastAPI:
     app = FastAPI(lifespan=lifespan)
     app.include_router(webhook.router)
     app.include_router(health.router)
 
     if settings.environment == 'dev':
-        app.include_router(dev.router)
+        if include_dev_routes:
+            from src.api import dev
+            app.include_router(dev.router)
         boto3.set_stream_logger('')
 
     return app
