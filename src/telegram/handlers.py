@@ -4,9 +4,9 @@ from aiogram.filters import CommandStart, Command
 from aiogram.utils.markdown import hbold
 from aiogram.types import Message
 
-from src.video.translator import Translator
-
 from loguru import logger
+from pydantic import HttpUrl
+from src.video.evaluator import Evaluator, Action
 
 router = Router(name=__name__)
 
@@ -24,8 +24,6 @@ async def cmd_start(message: Message) -> None:
 
 @router.message()
 async def translate_video(message: types.Message) -> None:
-    translator = Translator()
-
     if not message.text:
         logger.warning(f"Invalid message received from telegram {message}")
         return
@@ -34,4 +32,11 @@ async def translate_video(message: types.Message) -> None:
         logger.warning(f"No user found in message {message}")
         return
 
-    await translator.translate_video(message.text, str(message.from_user.id))
+    result = Evaluator().evaluate(message.text, str(message.from_user.id))
+    match result.action:
+        case Action.TRANSLATE_VIDEO:
+            from src.video.translator import Translator
+            url_obj: HttpUrl = result.value
+            await Translator().translate(url_obj, str(message.from_user.id))
+        case Action.TRIGGER_TRANSLATION_LAMBDA:
+            logger.info("Triggering translation lambda")
