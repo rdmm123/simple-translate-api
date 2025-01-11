@@ -3,10 +3,11 @@ from aiogram import Router
 from aiogram.filters import CommandStart, Command
 from aiogram.utils.markdown import hbold
 from aiogram.types import Message
-
 from loguru import logger
 from pydantic import HttpUrl
+
 from src.video.evaluator import Evaluator, Action
+from typing import cast
 
 router = Router(name=__name__)
 
@@ -36,7 +37,7 @@ async def translate_video(message: types.Message) -> None:
     match result.action:
         case Action.TRANSLATE_VIDEO:
             from src.video.translator import Translator
-            url_obj: HttpUrl = result.value
+            url_obj: HttpUrl = cast(HttpUrl, result.value)
             await Translator().translate(url_obj, str(message.from_user.id))
         case Action.TRIGGER_TRANSLATION_LAMBDA:
             logger.info("Triggering translation lambda")

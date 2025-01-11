@@ -1,8 +1,8 @@
 import boto3
 from fastapi import FastAPI
+from starlette.types import Lifespan
 from fastapi.routing import APIRoute
-from typing import AsyncGenerator
-from pydantic_settings import BaseSettings
+from src.settings import Settings
 from loguru import logger
 
 from src.api import (
@@ -12,8 +12,8 @@ from src.api import (
 
 
 def create_app(
-    settings: BaseSettings,
-    lifespan: AsyncGenerator[None] | None = None,
+    settings: Settings,
+    lifespan: Lifespan[FastAPI] | None = None,
     include_dev_routes: bool = True
 ) -> FastAPI:
     app = FastAPI(lifespan=lifespan)
