@@ -4,7 +4,7 @@ from src.video.compressor import Compressor
 from src.video.downloader import Downloader
 from src.video.uploader import Uploader
 from src.settings import get_settings
-from src.core.helpers import url_to_filename
+from src.misc.helpers import url_to_filename
 
 
 class Translator:

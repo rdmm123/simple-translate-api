@@ -2,7 +2,7 @@ from loguru import logger
 from pydantic import BaseModel, HttpUrl
 from enum import Enum
 
-from src.core.helpers import validate_url
+from src.misc.helpers import validate_url
 from src.settings import get_settings
 
 class Action(Enum):

@@ -7,12 +7,14 @@ requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.35.82",
     "loguru>=0.7.2",
+    "pydantic>=2.9.2",
     "pydantic-settings>=2.6.1",
     "types-boto3-custom",
 ]
 
 [project.optional-dependencies]
 lambda = [
+    "aws-lambda-typing>=2.20.0",
     "awslambdaric>=3.0.0",
 ]
 api = [
@@ -38,17 +40,18 @@ dev = [
 
 [tool.poe.tasks]
 run = "fastapi dev"
-generate_aws_types = [
+generate-aws-types = [
     { cmd = "uvx mypy_boto3_builder ./vendored --download-static-stubs --product types-boto3-custom --output-type wheel --services lambda s3" },
     { cmd = "uv add vendored/types_boto3_custom-1.35.82-py3-none-any.whl" }
 ]
-check_types = "mypy ."
+check-types = "mypy ."
 install = 'uv sync --all-extras'
 
 
 [tool.mypy]
 exclude = ["infra/*"]
 strict = true
+explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = "ffmpeg.*"

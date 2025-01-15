@@ -9,7 +9,7 @@ from loguru import logger
 from pydantic import HttpUrl
 
 from src.core.scraper import Scraper
-from src.core.helpers import url_to_filename
+from src.misc.helpers import url_to_filename
 from src.settings import get_settings
 
 
