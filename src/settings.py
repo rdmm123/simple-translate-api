@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     runtime: Literal['server', 'lambda'] = 'server'
     environment: Literal['dev', 'prd'] = 'dev'
     s3_bucket_name: str = 'bucket-name'
+    lambda_host: str | None = None
 
 
 @lru_cache()  # get it from memory
