@@ -1,2 +1,7 @@
 .venv
 .env
+.git
+.gitignore
+*/**/cdk.out
+__pycache__
+*.pyc

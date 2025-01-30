@@ -25,10 +25,24 @@ class SimpleTranslateStack(Stack):
         )
         CfnOutput(self, "BucketNameOutput", value=bucket.bucket_name)
 
-        docker_image = ecr_assets.DockerImageAsset(self, "SimpleTranslateImage")
-        function = aws_lambda.Function(
+        function = aws_lambda.DockerImageFunction(
             self,
-            "SimpleTranslateApi",
-            code=aws_lambda.DockerImageCode.from_image_asset(docker_image),
+            "StApi",
+            code=aws_lambda.DockerImageCode.from_image_asset(
+                "..",
+                file="functions/api/Dockerfile",
+            ),
+            timeout=Duration.seconds(60),
         )
-        bucket.grant_read_write(function)
+        url = function.add_function_url(auth_type=aws_lambda.FunctionUrlAuthType.NONE)
+        CfnOutput(self, "ApiFnName", value=function.function_name)
+        CfnOutput(self, "ApiFnUrl", value=url.url)
+        # bucket.grant_read_write(function)
+
+        # function = aws_lambda.Function(
+        #     self,
+        #     "SimpleTranslateMessager",
+        #     code=aws_lambda.Code.from_asset(""),
+        #     runtime=aws_lambda.Runtime.PYTHON_3_13,
+        #     handler="main.handler",
+        # )

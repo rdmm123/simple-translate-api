@@ -20,7 +20,7 @@ RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
 
 FROM public.ecr.aws/lambda/python:3.13
 
-COPY --from=builder /app .
+COPY --from=builder /app /var/task
 COPY --from=builder /var/lang /var/lang
 
 CMD ["handler.handler"]
